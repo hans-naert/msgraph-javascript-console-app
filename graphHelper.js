@@ -1,0 +1,67 @@
+import 'isomorphic-fetch';
+import { DeviceCodeCredential } from '@azure/identity';
+import { Client } from '@microsoft/microsoft-graph-client';
+// prettier-ignore
+import { TokenCredentialAuthenticationProvider } from
+  '@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials/index.js';
+
+let _settings = undefined;
+let _deviceCodeCredential = undefined;
+let _userClient = undefined;
+
+export function initializeGraphForUserAuth(settings, deviceCodePrompt) {
+  // Ensure settings isn't null
+  if (!settings) {
+    throw new Error('Settings cannot be undefined');
+  }
+
+  _settings = settings;
+
+  _deviceCodeCredential = new DeviceCodeCredential({
+    clientId: settings.clientId,
+    tenantId: settings.tenantId,
+    userPromptCallback: deviceCodePrompt,
+  });
+
+  const authProvider = new TokenCredentialAuthenticationProvider(
+    _deviceCodeCredential,
+    {
+      scopes: settings.graphUserScopes,
+    },
+  );
+
+  _userClient = Client.initWithMiddleware({
+    authProvider: authProvider,
+  });
+}
+
+export async function getUserTokenAsync() {
+    // Ensure credential isn't undefined
+    if (!_deviceCodeCredential) {
+      throw new Error('Graph has not been initialized for user auth');
+    }
+  
+    // Ensure scopes isn't undefined
+    if (!_settings?.graphUserScopes) {
+      throw new Error('Setting "scopes" cannot be undefined');
+    }
+  
+    // Request token with given scopes
+    const response = await _deviceCodeCredential.getToken(
+      _settings?.graphUserScopes,
+    );
+    return response.token;
+  }
+
+  export async function getUserAsync() {
+    // Ensure client isn't undefined
+    if (!_userClient) {
+      throw new Error('Graph has not been initialized for user auth');
+    }
+  
+    // Only request specific properties with .select()
+    return _userClient
+      .api('/me')
+      .select(['displayName', 'mail', 'userPrincipalName'])
+      .get();
+  }
