@@ -5,7 +5,7 @@ import {
   initializeGraphForUserAuth,
   getUserAsync,
   getUserTokenAsync,
-  //getInboxAsync,
+  getInboxAsync,
   //sendMailAsync,
   //makeGraphCallAsync,
 } from './graphHelper.js';
@@ -92,7 +92,25 @@ function initializeGraph(settings) {
   }
   
   async function listInboxAsync() {
-    // TODO
+    try {
+      const messagePage = await getInboxAsync();
+      const messages = messagePage.value;
+  
+      // Output each message's details
+      for (const message of messages) {
+        console.log(`Message: ${message.subject ?? 'NO SUBJECT'}`);
+        console.log(`  From: ${message.from?.emailAddress?.name ?? 'UNKNOWN'}`);
+        console.log(`  Status: ${message.isRead ? 'Read' : 'Unread'}`);
+        console.log(`  Received: ${message.receivedDateTime}`);
+      }
+  
+      // If @odata.nextLink is not undefined, there are more messages
+      // available on the server
+      const moreAvailable = messagePage['@odata.nextLink'] != undefined;
+      console.log(`\nMore messages available? ${moreAvailable}`);
+    } catch (err) {
+      console.log(`Error getting user's inbox: ${err}`);
+    }
   }
   
   async function sendMailToSelfAsync() {

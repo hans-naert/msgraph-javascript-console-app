@@ -65,3 +65,17 @@ export async function getUserTokenAsync() {
       .select(['displayName', 'mail', 'userPrincipalName'])
       .get();
   }
+
+  export async function getInboxAsync() {
+    // Ensure client isn't undefined
+    if (!_userClient) {
+      throw new Error('Graph has not been initialized for user auth');
+    }
+  
+    return _userClient
+      .api('/me/mailFolders/inbox/messages')
+      .select(['from', 'isRead', 'receivedDateTime', 'subject'])
+      .top(25)
+      .orderby('receivedDateTime DESC')
+      .get();
+  }
