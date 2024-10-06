@@ -79,3 +79,31 @@ export async function getUserTokenAsync() {
       .orderby('receivedDateTime DESC')
       .get();
   }
+
+  export async function sendMailAsync(subject, body, recipient) {
+    // Ensure client isn't undefined
+    if (!_userClient) {
+      throw new Error('Graph has not been initialized for user auth');
+    }
+  
+    // Create a new message
+    const message = {
+      subject: subject,
+      body: {
+        content: body,
+        contentType: 'text',
+      },
+      toRecipients: [
+        {
+          emailAddress: {
+            address: recipient,
+          },
+        },
+      ],
+    };
+  
+    // Send the message
+    return _userClient.api('me/sendMail').post({
+      message: message,
+    });
+  }

@@ -6,7 +6,7 @@ import {
   getUserAsync,
   getUserTokenAsync,
   getInboxAsync,
-  //sendMailAsync,
+  sendMailAsync,
   //makeGraphCallAsync,
 } from './graphHelper.js';
 
@@ -114,7 +114,22 @@ function initializeGraph(settings) {
   }
   
   async function sendMailToSelfAsync() {
-    // TODO
+    try {
+      // Send mail to the signed-in user
+      // Get the user for their email address
+      const user = await getUserAsync();
+      const userEmail = user?.mail ?? user?.userPrincipalName;
+  
+      if (!userEmail) {
+        console.log("Couldn't get your email address, canceling...");
+        return;
+      }
+  
+      await sendMailAsync('Testing Microsoft Graph', 'Hello world!', userEmail);
+      console.log('Mail sent.');
+    } catch (err) {
+      console.log(`Error sending mail: ${err}`);
+    }
   }
   
   async function doGraphCallAsync() {
