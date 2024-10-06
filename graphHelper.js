@@ -107,3 +107,17 @@ export async function getUserTokenAsync() {
       message: message,
     });
   }
+
+  // This function serves as a playground for testing Graph snippets
+// or other code
+export async function makeGraphCallAsync() {
+   // Ensure client isn't undefined
+   if (!_userClient) {
+    throw new Error('Graph has not been initialized for user auth');
+  }
+
+  // Only request specific properties with .select()
+  return _userClient
+    .api('/me/todo/lists')
+    .get();
+  }

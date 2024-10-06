@@ -7,7 +7,7 @@ import {
   getUserTokenAsync,
   getInboxAsync,
   sendMailAsync,
-  //makeGraphCallAsync,
+  makeGraphCallAsync,
 } from './graphHelper.js';
 
 async function main() {
@@ -133,5 +133,15 @@ function initializeGraph(settings) {
   }
   
   async function doGraphCallAsync() {
-    // TODO
+    try {
+        const listsPage =await makeGraphCallAsync();
+        console.log (listsPage);
+        const lists = listsPage.value;
+
+        for (const list of lists)
+          console.log(`List: ${list.displayName}`);
+
+    } catch (err) {
+      console.log(`Error making Graph call: ${err}`);
+    }
   }
